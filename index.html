@@ -12,29 +12,37 @@
 @media(max-width:720px){header{padding:16px 18px}.header-note{display:none}.intro{padding:22px 18px 18px;display:block}.intro h1 span{display:block;margin-bottom:8px;font-size:36px}.intro p{font-size:14px}.chips{justify-content:start;margin-top:16px}.workspace{padding:0 12px 20px;display:flex;flex-direction:column;gap:12px}.scene-panel{order:0;min-height:530px}.controls{order:1;padding:20px}.info{order:2;display:block;padding:22px}.viewport{min-height:360px}.scene-top{padding:16px}.scene-bottom{padding:10px 14px 16px}.scene-actions{flex-wrap:wrap}.gesture{max-width:none;order:2;width:100%;margin-top:8px}.modes{grid-template-columns:1fr 1fr}.mode:last-child{grid-column:1/-1}.control-group{margin-top:18px;padding-top:16px}.explain{display:block;padding:0 12px 20px}.explain article{padding:18px 12px}.number{float:left;margin-right:18px;min-width:66px}.footer{margin:0 24px 24px;display:block}.footer>a{display:block;margin-top:15px}.legend{gap:12px}.info .facts{margin-top:16px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 .intro-credits{margin-top:18px;border-left:3px solid var(--cyan);padding-left:14px;font-size:15px;color:var(--text);overflow-wrap:anywhere}.intro-credits strong{display:block;color:var(--cyan);font-size:13px;letter-spacing:.06em;text-transform:uppercase;font-weight:650;margin-bottom:5px}.intro-credits span{display:block;line-height:1.6}
+
+/* A área de exploração fica no centro; os controles permanecem compactos. */
+.workspace{grid-template-columns:minmax(0,1fr) 284px}
+.controls{grid-column:1/-1;display:flex;align-items:center;gap:14px 22px;flex-wrap:wrap;padding:14px 18px}
+.controls>.section-label,.controls .control-group>.section-label{margin:0}
+.modes{display:flex;gap:8px;flex-wrap:wrap}
+.mode{white-space:nowrap}
+.controls .control-group{display:flex;align-items:center;gap:12px;border:0;margin:0;padding:0}
+.controls .check{white-space:nowrap;padding:0}
+.controls .range-label{gap:8px;white-space:nowrap}
+.controls input[type=range]{width:110px;margin:0}
+.electron-count{margin:0;max-width:185px;line-height:1.25}
+.scene-panel{min-height:570px}
+@media(max-width:900px){.workspace{display:flex;flex-direction:column}.scene-panel{order:0;min-height:530px}.controls{order:1}.info{order:2;display:block;grid-column:auto}}
+@media(max-width:720px){.controls{gap:14px}.controls>.section-label{width:100%}.controls .control-group{flex-wrap:wrap}.controls #layers{width:100%}.electron-count{max-width:none}.controls input[type=range]{width:125px}}
 </style>
 </head>
 <body>
 <header><div class="brand"><span class="brand-icon" aria-hidden="true">⌬</span> Laboratório molecular</div><span class="header-note">Exploração interativa / Química</span></header>
 <main>
-<section class="intro"><div><div class="eyebrow">Molécula 01</div><h1><span>PBr₃</span> Tribrometo de fósforo</h1><p>Gire, selecione um átomo e explore suas ligações.</p><div class="intro-credits" aria-label="Responsáveis pelo projeto"><strong>Responsáveis</strong><span>Antonio Joaquim de Lira Neto</span><span>Jean Richardson Gonçalves Marcos</span></div></div><div class="chips"><span class="chip">Piramidal trigonal</span><span class="chip">AX₃E</span><span class="chip">Polar</span></div></section>
+<section class="intro"><div><h1><span>PBr₃</span> Tribrometo de fósforo</h1><p>Gire, selecione um átomo e explore suas ligações.</p><div class="intro-credits" aria-label="Responsáveis pelo projeto"><strong>Responsáveis</strong><span>Antonio Joaquim de Lira Neto</span><span>Jean Richardson Gonçalves Marcos</span></div></div></section>
 <div class="workspace">
 <aside class="panel controls" aria-label="Controles da visualização">
 <span class="section-label">Representação</span>
 <div class="modes" role="group" aria-label="Modelo molecular">
 <button class="mode" data-mode="ball" aria-pressed="true"><span class="glyph" aria-hidden="true">●—●</span> Esferas e varetas</button>
-<button class="mode" data-mode="sticks" aria-pressed="false"><span class="glyph" aria-hidden="true">╱╲</span> Varetas</button>
-<button class="mode" data-mode="space" aria-pressed="false"><span class="glyph" aria-hidden="true">◉</span> Espaço preenchido</button>
-<button class="mode" data-mode="cloud" aria-pressed="false"><span class="glyph" aria-hidden="true">◌</span> Nuvens esquemáticas</button>
 <button class="mode" data-mode="lewis" aria-pressed="false"><span class="glyph" aria-hidden="true">··</span> Estrutura de Lewis</button>
 </div>
-<p id="mode-note">Átomos e ligações em destaque. Tamanhos das esferas reduzidos para facilitar a leitura.</p>
-<div class="control-group" id="layers"><span class="section-label">Camadas</span>
+<div class="control-group" id="layers"><span class="section-label">Elétrons</span>
 <label class="check"><input id="bond-electrons" type="checkbox" checked> Elétrons das ligações</label>
 <label class="check"><input id="lone-electrons" type="checkbox"> Pares de elétrons livres</label>
-<label class="check"><input id="labels" type="checkbox" checked> Símbolos dos átomos</label>
-<label class="check"><input id="geometry" type="checkbox"> Ângulo e geometria</label>
-<label class="check"><input id="polarity" type="checkbox"> Polaridade das ligações</label>
 <p class="electron-count" id="electron-count">6 elétrons de ligação em destaque</p>
 </div>
 <div class="control-group"><label class="range-label" for="zoom">Zoom <output id="zoom-output">100%</output></label><input id="zoom" type="range" min="65" max="170" value="100" step="1"></div>
@@ -61,8 +69,8 @@ const canvas=$('molecule'),ctx=canvas.getContext('2d');
 const V={add:(a,b)=>a.map((v,i)=>v+b[i]),sub:(a,b)=>a.map((v,i)=>v-b[i]),mul:(a,s)=>a.map(v=>v*s),dot:(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0),cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],norm:a=>{const l=Math.hypot(...a);return a.map(v=>v/l)},mix:(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t)};
 // NIST Cartesian coordinates (angstroms), reordered from (x,y,z) to (x,z,y).
 const atoms=[{s:'P',p:[0,.8819,0],color:'#ffb362'},{s:'Br',p:[0,-.126,1.978],color:'#c26579'},{s:'Br',p:[1.713,-.126,-.989],color:'#c26579'},{s:'Br',p:[-1.713,-.126,-.989],color:'#c26579'}];
-const modes={ball:['Esferas e varetas','Átomos e ligações em destaque. Tamanhos das esferas reduzidos para facilitar a leitura.'],sticks:['Varetas','Realça a conectividade e os ângulos. Os pequenos nós continuam selecionáveis.'],space:['Espaço preenchido','Sugere o volume ocupado pelos átomos, com raios ilustrativos. Elétrons ficam ocultos neste modo.'],cloud:['Nuvens esquemáticas','Envelopes translúcidos ajudam a localizar os pares. Não representam orbitais calculados.'],lewis:['Estrutura de Lewis','Todos os 26 elétrons de valência: 3 pares ligantes e 10 pares livres. Diagrama plano, sem escala.']};
-let state={mode:'ball',selected:0,yaw:-.38,pitch:.28,zoom:1,auto:false,bond:true,lone:false,labels:true,geometry:false,polarity:false};
+const modes={ball:'Esferas e varetas',lewis:'Estrutura de Lewis'};
+let state={mode:'ball',selected:0,yaw:-.38,pitch:.28,zoom:1,auto:false,bond:true,lone:false,labels:true};
 let width=1,height=1,hits=[],raf=0,last=0;
 function rotate(p){const x=p[0]*Math.cos(state.yaw)+p[2]*Math.sin(state.yaw),z=-p[0]*Math.sin(state.yaw)+p[2]*Math.cos(state.yaw);return[x,p[1]*Math.cos(state.pitch)-z*Math.sin(state.pitch),p[1]*Math.sin(state.pitch)+z*Math.cos(state.pitch)];}
 function project(p){const r=rotate(p),scale=Math.min(width/6.7,height/5.4)*state.zoom,f=9/(9-r[2]);return{x:width/2+r[0]*scale*f,y:height*.53-r[1]*scale*f,z:r[2],s:scale*f};}
@@ -76,24 +84,22 @@ function draw(t=0){raf=0;const dt=Math.min((t-last)/1000,.04);last=t;if(state.au
 if(state.mode==='lewis')return;
 // Subtle reference plane, rotated with the molecule.
 for(let i=-4;i<=4;i++){line(project([i,-1.7,-4]),project([i,-1.7,4]),'#829fc010',1);line(project([-4,-1.7,i]),project([4,-1.7,i]),'#829fc010',1);}
-const objects=[],space=state.mode==='space',cloud=state.mode==='cloud';
-if(state.geometry){const base=atoms.slice(1).map(a=>project(a.p));ctx.beginPath();ctx.moveTo(base[0].x,base[0].y);base.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));ctx.closePath();ctx.fillStyle='#7bddda0c';ctx.fill();for(let i=0;i<3;i++)line(base[i],base[(i+1)%3],'#7bddda66',1,[4,5]);const p=atoms[0].p,u=V.norm(V.sub(atoms[1].p,p)),v=V.norm(V.sub(atoms[2].p,p));let prev;for(let i=0;i<=30;i++){const q=project(V.add(p,V.mul(V.norm(V.mix(u,v,i/30)),.75)));if(prev)line(prev,q,'#7bddda',1.5);prev=q;}const q=project(V.add(p,V.mul(V.norm(V.add(u,v)),1.03)));label('101°',q,'#a6eeeb',13);}
-for(let i=1;i<4;i++){const rawA=atoms[0].p,rawB=atoms[i].p,u=V.norm(V.sub(rawB,rawA)),offset=state.mode==='sticks'?.15:cloud?.45:.4,a=V.add(rawA,V.mul(u,offset)),b=V.sub(rawB,V.mul(u,state.mode==='sticks'?.15:cloud?.52:.47));if(!space){for(let j=0;j<36;j++){const p=project(V.mix(a,b,j/36)),q=project(V.mix(a,b,(j+1)/36)),mid=project(V.mix(a,b,(j+.5)/36));objects.push({z:mid.z,draw:()=>{line(p,q,j<18?'#b68959':'#945062',mid.s*(state.mode==='sticks'?.13:.11));}});}}}
-atoms.forEach((a,i)=>{const p=project(a.p),r=(space?(i?1.18:1.12):cloud?(i?.52:.45):state.mode==='sticks'?.15:(i?.47:.4))*p.s;objects.push({z:p.z,draw:()=>{sphere(p,r,a.color,state.selected===i,cloud?.46:1);hits.push({...p,r,index:i});}});});
-if(!space){for(const pair of pairPositions()){if(!(pair.kind==='bond'?state.bond:state.lone))continue;const color=pair.kind==='bond'?'#7bddda':'#b6a0f5',center=project(pair.p);if(cloud)objects.push({z:center.z-.06,draw:()=>{ctx.save();ctx.translate(center.x,center.y);ctx.scale(1.5,1);const g=ctx.createRadialGradient(0,0,0,0,0,center.s*.33);g.addColorStop(0,color+'66');g.addColorStop(1,color+'00');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,center.s*.33,0,Math.PI*2);ctx.fill();ctx.restore();}});for(const sign of [-1,1]){const p=project(V.add(pair.p,V.mul(pair.side,.105*sign)));objects.push({z:p.z+.02,draw:()=>{sphere(p,Math.max(3,p.s*.062),color);}});}}}
+const objects=[];
+for(let i=1;i<4;i++){const rawA=atoms[0].p,rawB=atoms[i].p,u=V.norm(V.sub(rawB,rawA)),offset=.4,a=V.add(rawA,V.mul(u,offset)),b=V.sub(rawB,V.mul(u,.47));{for(let j=0;j<36;j++){const p=project(V.mix(a,b,j/36)),q=project(V.mix(a,b,(j+1)/36)),mid=project(V.mix(a,b,(j+.5)/36));objects.push({z:mid.z,draw:()=>{line(p,q,j<18?'#b68959':'#945062',mid.s*.11);}});}}}
+atoms.forEach((a,i)=>{const p=project(a.p),r=(i?.47:.4)*p.s;objects.push({z:p.z,draw:()=>{sphere(p,r,a.color,state.selected===i);hits.push({...p,r,index:i});}});});
+{for(const pair of pairPositions()){if(!(pair.kind==='bond'?state.bond:state.lone))continue;const color=pair.kind==='bond'?'#7bddda':'#b6a0f5',center=project(pair.p);for(const sign of [-1,1]){const p=project(V.add(pair.p,V.mul(pair.side,.105*sign)));objects.push({z:p.z+.02,draw:()=>{sphere(p,Math.max(3,p.s*.062),color);}});}}}
 objects.sort((a,b)=>a.z-b.z).forEach(o=>o.draw());
-if(state.labels)for(const h of hits){const occluded=hits.some(other=>other.z>h.z&&Math.hypot(h.x-other.x,h.y-other.y)<other.r*.8);if(!occluded)label(atoms[h.index].s,h,'#fff',state.mode==='sticks'?14:20);}
-if(state.polarity){for(let i=1;i<4;i++){const a=project(V.mix(atoms[0].p,atoms[i].p,.23)),b=project(V.mix(atoms[0].p,atoms[i].p,.74));a.x+=10;b.x+=10;line(a,b,'#f0d384',1.5);const angle=Math.atan2(b.y-a.y,b.x-a.x);line(b,{x:b.x-8*Math.cos(angle-.4),y:b.y-8*Math.sin(angle-.4)},'#f0d384',1.5);line(b,{x:b.x-8*Math.cos(angle+.4),y:b.y-8*Math.sin(angle+.4)},'#f0d384',1.5);}atoms.forEach((a,i)=>{const p=project(a.p);label(i?'δ−':'δ+',{x:p.x+26,y:p.y-30},'#f0d384',15);});}
+if(state.labels)for(const h of hits){const occluded=hits.some(other=>other.z>h.z&&Math.hypot(h.x-other.x,h.y-other.y)<other.r*.8);if(!occluded)label(atoms[h.index].s,h,'#fff',20);}
 if(state.auto&&!document.hidden)requestDraw();}
 function updateAtom(i){state.selected=i;document.querySelectorAll('[data-atom]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.atom)===i));const p=i===0;$('atomic-number').textContent=p?'15':'35';$('symbol').textContent=p?'P':'Br';$('atom-name').textContent=p?'Fósforo':'Bromo';$('atom-role').textContent=p?'Átomo central':`Átomo terminal · Br${['','₁','₂','₃'][i]}`;$('element-tile').style.cssText=p?'':'color:#f0a0b1;background:#30202c;border-color:#87526c';const facts=[['Número atômico',p?'15':'35'],['Massa atômica',p?'30,974 u':'79,904 u'],['Elétrons de valência',p?'5':'7'],['Ligações no PBr₃',p?'3 simples':'1 simples'],['Pares livres',p?'1 par · 2 e⁻':'3 pares · 6 e⁻'],['Carga formal','0']];$('facts').innerHTML=facts.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');$('configuration').innerHTML=p?'[Ne] 3s² 3p³<br><span style="color:var(--muted)">Camadas: 2 · 8 · 5</span>':'[Ar] 3d¹⁰ 4s² 4p⁵<br><span style="color:var(--muted)">Camadas: 2 · 8 · 18 · 7</span>';$('atom-explanation').innerHTML=p?'<strong>Um par livre muda a forma.</strong><br>No modelo de Lewis, o P compartilha três pares com os bromos e mantém um par livre. Assim, completa seu octeto.':'<strong>Um elétron para compartilhar.</strong><br>Cada Br forma uma ligação com o P e mantém três pares livres. O par compartilhado completa o octeto do bromo.';$('selection-live').textContent=`Selecionado: ${p?'fósforo':'bromo '+i}. ${p?'Três ligações e um par livre.':'Uma ligação e três pares livres.'}`;requestDraw();}
 function makeLewis(){const pts=[[260,155],[100,155],[420,155],[260,315]];let s='<svg viewBox="0 0 520 410" role="img" aria-label="Estrutura de Lewis: P central com três ligações simples e um par livre; cada Br tem três pares livres.">';for(let i=1;i<4;i++){const [x,y]=pts[i],[px,py]=pts[0],dx=(x-px),dy=(y-py),l=Math.hypot(dx,dy),ux=dx/l,uy=dy/l;s+=`<line x1="${px+ux*35}" y1="${py+uy*35}" x2="${x-ux*35}" y2="${y-uy*35}" stroke="#8597aa" stroke-width="3"/>`;const mx=(x+px)/2,my=(y+py)/2;for(const n of [-1,1])s+=`<circle cx="${mx-uy*n*6}" cy="${my+ux*n*6}" r="4" fill="#7bddda"/>`;}
 pts.forEach(([x,y],i)=>{s+=`<text x="${x}" y="${y+9}" fill="${i?'#f0a0b1':'#ffb362'}" font-size="32" font-family="system-ui" text-anchor="middle">${i?'Br':'P'}</text>`;const dirs=i===0?[[0,-1]]:i===1?[[-1,0],[0,-1],[0,1]]:i===2?[[1,0],[0,-1],[0,1]]:[[-1,0],[1,0],[0,1]];for(const [dx,dy]of dirs)for(const n of [-1,1])s+=`<circle cx="${x+dx*38-dy*n*6}" cy="${y+dy*38+dx*n*6}" r="4" fill="#b6a0f5"/>`;});s+='<text x="260" y="395" text-anchor="middle" fill="#a7b7c9" font-family="system-ui" font-size="14">Cada linha = um par de elétrons</text></svg>';$('lewis').innerHTML=s;}
-function setMode(mode){if(!Object.hasOwn(modes,mode))throw new Error('Representação inválida');state.mode=mode;document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===mode));$('scene-name').textContent=modes[mode][0];$('mode-note').textContent=modes[mode][1];const lewis=mode==='lewis',space=mode==='space';$('lewis').style.display=lewis?'flex':'none';canvas.style.display=lewis?'none':'block';$('scene-badge').textContent=lewis?'LEWIS · 2D':'MODELO 3D';$('scene-sub').textContent=lewis?'6 e⁻ ligantes + 20 e⁻ não ligantes':'3 ligações simples · 1 par livre no P';$('gesture').textContent=lewis?'Cada linha representa um par compartilhado.':'Arraste para girar · Role para ampliar';for(const id of ['zoom','auto','geometry','labels','polarity'])$(id).disabled=lewis;for(const id of ['bond-electrons','lone-electrons'])$(id).disabled=lewis||space;syncCount();resize();}
-function syncCount(){$('electron-count').textContent=state.mode==='lewis'?'26 elétrons de valência representados':state.mode==='space'?'Elétrons ocultos para visualizar o volume':`${(state.bond?6:0)+(state.lone?20:0)} elétrons em destaque${state.lone?' · 20 livres':''}`;}
+function setMode(mode){if(!Object.hasOwn(modes,mode))throw new Error('Representação inválida');state.mode=mode;document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===mode));$('scene-name').textContent=modes[mode];const lewis=mode==='lewis';$('lewis').style.display=lewis?'flex':'none';canvas.style.display=lewis?'none':'block';$('scene-badge').textContent=lewis?'LEWIS · 2D':'MODELO 3D';$('scene-sub').textContent=lewis?'6 e⁻ ligantes + 20 e⁻ não ligantes':'3 ligações simples · 1 par livre no P';$('gesture').textContent=lewis?'Cada linha representa um par compartilhado.':'Arraste para girar · Role para ampliar';for(const id of ['zoom','auto','bond-electrons','lone-electrons'])$(id).disabled=lewis;syncCount();resize();}
+function syncCount(){$('electron-count').textContent=state.mode==='lewis'?'26 elétrons de valência representados':`${(state.bond?6:0)+(state.lone?20:0)} elétrons em destaque${state.lone?' · 20 livres':''}`;}
 function setZoom(value){state.zoom=Math.max(.65,Math.min(1.7,value));$('zoom').value=Math.round(state.zoom*100);$('zoom-output').textContent=Math.round(state.zoom*100)+'%';requestDraw();}
 function setAuto(v){state.auto=v;$('auto').setAttribute('aria-pressed',v);$('auto').textContent=v?'Ⅱ Pausar':'↻ Girar';last=performance.now();requestDraw();}
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));document.querySelectorAll('[data-atom]').forEach(b=>b.onclick=()=>updateAtom(Number(b.dataset.atom)));
-for(const [id,key]of [['bond-electrons','bond'],['lone-electrons','lone'],['labels','labels'],['geometry','geometry'],['polarity','polarity']])$(id).onchange=e=>{state[key]=e.target.checked;syncCount();requestDraw();};
+for(const [id,key]of [['bond-electrons','bond'],['lone-electrons','lone']])$(id).onchange=e=>{state[key]=e.target.checked;syncCount();requestDraw();};
 $('zoom').oninput=e=>setZoom(Number(e.target.value)/100);$('auto').onclick=()=>setAuto(!state.auto);$('reset').onclick=()=>{state.yaw=-.38;state.pitch=.28;setZoom(1);setAuto(false);requestDraw();};
 const pointers=new Map();let start=null,moved=false,pinch=0;
 canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);canvas.focus({preventScroll:true});pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1){start={x:e.clientX,y:e.clientY};moved=false;}else{moved=true;const [a,b]=[...pointers.values()];pinch=Math.hypot(a.x-b.x,a.y-b.y);}setAuto(false);});
